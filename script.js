@@ -1,49 +1,80 @@
-$('.btn-search-movie').on('click', function(){
-    $.ajax({
-        url: 'https://www.omdbapi.com/?apikey=adec1774&s=' + $('.key-search-movie').val(),
-        success: result => {
-            if(result.Response == "True"){
-                const movies = result.Search
+// Menggunakan jquery
+// $('.btn-search-movie').on('click', function () {
+//     $.ajax({
+//         url: 'https://www.omdbapi.com/?apikey=adec1774&s=' + $('.key-search-movie').val(),
+//         success: result => {
+//             if (result.Response == "True") {
+//                 const movies = result.Search
+//                 let el = ''
+//                 movies.forEach(e => {
+//                     el += showCard(e)
+//                 })
+//                 $('#movies-container').html(el)
+//             } else {
+//                 $('#movies-container').html(showError(result.Error))
+//             }
+//             $('.modal-detail-button').on('click', function () {
+//                 $.ajax({
+//                     url: `https://www.omdbapi.com/?apikey=adec1774&i=${$(this).data('movie-id')}`,
+//                     success: m => {
+//                         $('.detail-movie').html(showDetailMovie(m))
+//                     },
+//                     error: e => {
+//                         console.log(e.responseText);
+//                     }
+//                 })
+//             })
+//         },
+//         error: e => {
+//             console.log(e.responseText);
+//         }
+//     })
+// })
+
+// Mengunakan vanilla javascript fetch
+const searchBtn = document.querySelector('.btn-search-movie')
+searchBtn.addEventListener('click', function () {
+    let search = document.querySelector('.key-search-movie').value
+    fetch('https://www.omdbapi.com/?apikey=adec1774&s=' + search)
+        .then(response => response.json())
+        .then(response => {
+            if(response.Response === 'True'){
+                const movies = response.Search
                 let el = ''
-                movies.forEach(e => {
-                    el += showCard(e)
-                })
-                $('#movies-container').html(el)
+                movies.forEach(e => el += showCard(e))
+                document.querySelector('#movies-container').innerHTML = el
             }else{
-                $('#movies-container').html(showError(result.Error))
+                document.querySelector('#movies-container').innerHTML = response.Error
             }
-            $('.modal-detail-button').on('click', function(){
-                $.ajax({
-                    url: `https://www.omdbapi.com/?apikey=adec1774&i=${$(this).data('movie-id')}`,
-                    success: m => {
-                        $('.detail-movie').html(showDetailMovie(m))
-                    },
-                    error: e => {
-                        console.log(e.responseText);
-                    }
+            const modalButton = document.querySelectorAll('.modal-detail-button')
+            modalButton.forEach(btn => {
+                btn.addEventListener('click', function(){
+                    const id = this.dataset.movieid
+                    fetch('https://www.omdbapi.com/?apikey=adec1774&i=' + id)
+                        .then(response => response.json())
+                        .then(response => {
+                            document.querySelector('.detail-movie').innerHTML = showDetailMovie(response)
+                        })
                 })
             })
-        },
-        error: e => {
-            console.log(e.responseText);
-        }
-    })
+        })
+        .catch(error => console.log(error.responseText))
 })
 
-function showCard(e){
+function showCard(e) {
     return `<div class="col-xl-3 col-md-4 col-sm-6 my-3">
                 <div class="card">
                     <img src="${e.Poster}" class="card-img-top img-fluid">
                     <div class="card-body">
                         <h5 class="card-title">${e.Title}</h5>
                         <h6 class="text-muted">${e.Year}</h6>
-                        <a href="#" class="btn btn-primary modal-detail-button" data-bs-toggle="modal" data-bs-target="#movieDetailModal" data-movie-id="${e.imdbID}">Show Details</a>
+                        <a href="#" class="btn btn-primary modal-detail-button" data-bs-toggle="modal" data-bs-target="#movieDetailModal" data-movieid="${e.imdbID}">Show Details</a>
                     </div>
                 </div>
             </div>`
 }
 
-function showDetailMovie(m){
+function showDetailMovie(m) {
     return `<div class="row">
                 <div class="col-md-3">
                     <img src="${m.Poster}" class="img-fluid">
@@ -60,6 +91,6 @@ function showDetailMovie(m){
             </div>`
 }
 
-function showError(e){
+function showError(e) {
     return `<p class="text-center mt-5 fs-5">${e}</p>`
 }
