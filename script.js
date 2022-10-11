@@ -49,6 +49,7 @@ searchBtn.addEventListener('click', function () {
             const modalButton = document.querySelectorAll('.modal-detail-button')
             modalButton.forEach(btn => {
                 btn.addEventListener('click', function(){
+                    document.querySelector('.detail-movie').innetHTML = ''
                     const id = this.dataset.movieid
                     fetch('https://www.omdbapi.com/?apikey=adec1774&i=' + id)
                         .then(response => response.json())
